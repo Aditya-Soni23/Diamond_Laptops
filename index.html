@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIAMOND | Ultra Laptops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --secondary: #ff004c;
+            --bg: #05070a;
+        }
+
+     /* Change this */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    /* Remove cursor: none from here */
+}
+
+/* Add this */
+body, .card, .close-btn, .nav {
+    cursor: none;
+}
+
+#cursor {
+    width: 20px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none; /* This is crucial */
+    z-index: 10000; /* Higher than the popup */
+    mix-blend-mode: difference;
+    will-change: transform;
+}
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0,240,255,0.1) 0%, transparent 70%);
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .nav {
+            padding: 30px 60px;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+        }
+
+        /* CONTAINER ANIMATION */
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 100px 60px;
+            flex-wrap: wrap;
+            transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.6s;
+        }
+
+        /* SHRUNK STATE */
+        .body-shrunk .container {
+            transform: scale(0.95);
+            opacity: 0.2;
+            filter: blur(5px);
+        }
+
+        .card {
+            width: 320px;
+            height: 450px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            transform-style: preserve-3d;
+            transition: border 0.3s;
+        }
+
+        .card:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .card img {
+            width: 80%;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+            transform: translateZ(50px);
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card h2 {
+            margin-top: 30px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            transform: translateZ(30px);
+        }
+
+        /* POPUP SYSTEM FIXED */
+     /* POPUP SYSTEM WITH BACKGROUND IMAGE */
+/* POPUP SYSTEM WITH FADED BACKGROUND */
+
+
+/* THE FADED IMAGE LAYER */
+.popup {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    z-index: 1000;
+    background: var(--bg); /* Dark base */
+}
+
+
+/* Keep the content on top */
+.popup-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    width: 90%;
+    max-width: 1100px;
+    gap: 60px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* Content starts hidden for GSAP */
+}
+
+/* To this: */
+.popup-bg-image {
+    position: absolute;
+    inset: 0;
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5;             /* Full visibility */
+    filter: none;          /* Removes grayscale and blur */
+    z-index: -1;
+}
+
+        .info {
+            flex: 1;
+        }
+
+        .info h1 {
+            font-size: clamp(40px, 8vw, 80px);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 20px;
+            background: linear-gradient(to bottom, #fff, #666);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .spec-item {
+            font-size: 18px;
+            margin: 12px 0;
+            border-left: 3px solid var(--primary);
+            padding-left: 15px;
+            opacity: 0;
+            color: #ccc;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            transition: 0.3s;
+            background: rgba(255,255,255,0.05);
+            z-index: 1001;
+        }
+
+        .close-btn:hover {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 900px) {
+            .popup-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            #popup-img {
+                max-width: 80%;
+            }
+            .spec-item {
+                border-left: none;
+                border-bottom: 1px solid var(--primary);
+                padding: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div class="bg-glow" id="glow"></div>
+    
+    <nav class="nav">Diamond</nav>
+
+    <div class="container" id="cardContainer"></div>
+
+    <div class="popup" id="popup">
+        <div class="popup-bg-image"></div> 
+        
+        <div class="close-btn" onclick="closePopup()">✕</div>
+        <div class="popup-content">
+            <img id="popup-img" src="" alt="laptop">
+            <div class="info">
+                <h1 id="title"></h1>
+                <div id="specs-container"></div>
+                <div class="price" id="price" style="font-size: 40px; margin-top: 30px; font-weight: 800; color: var(--primary);"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const data = {
+    Raze: {
+        img: "assets/Raze.png",
+        specs: [
+            "Intel i9 14th Gen HX",
+            "RTX 4090",
+            "64GB DDR5 RAM",
+            "2TB Gen4 SSD",
+            "300Hz QHD Display",
+            "Heavy Duty Cooling System"
+        ],
+        price: "₹3,19,999"
+    },
+
+    Evolution: {
+        img: "assets/Evolution.png",
+        specs: [
+            "Intel i9 14th Gen",
+            "RTX 4080",
+            "32GB DDR5 RAM",
+            "2TB SSD",
+            "240Hz QHD Display",
+            "Advanced Cooling"
+        ],
+        price: "₹2,49,999"
+    },
+
+    "7ProB": {
+        img: "assets/7ProB.png",
+        specs: [
+            "Intel i7 14th Gen",
+            "RTX 4070",
+            "32GB RAM",
+            "1TB SSD",
+            "240Hz Display",
+            "Matte Black Finish"
+        ],
+        price: "₹1,99,999"
+    },
+
+    "7ProW": {
+        img: "assets/7ProW.png",
+        specs: [
+            "Intel i7 13th Gen",
+            "RTX 4060",
+            "16GB RAM",
+            "1TB SSD",
+            "165Hz Display",
+            "Clean White Finish"
+        ],
+        price: "₹1,79,999"
+    },
+
+    Vetran: {
+        img: "assets/Vetran.png",
+        specs: [
+            "AMD Ryzen 7",
+            "RTX 4060",
+            "16GB RAM",
+            "1TB SSD",
+            "165Hz Display",
+            "Balanced Gaming Build"
+        ],
+        price: "₹1,59,999"
+    },
+
+    EvoCore: {
+        img: "assets/EvoCore.png",
+        specs: [
+            "Intel i5 13th Gen",
+            "RTX 4050",
+            "16GB RAM",
+            "512GB SSD",
+            "144Hz Display",
+            "Budget Gaming Performer"
+        ],
+        price: "₹1,09,999"
+    },
+
+    Probook: {
+        img: "assets/Probook.png",
+        specs: [
+            "Intel i7 14th Gen",
+            "Integrated Iris Xe",
+            "32GB RAM",
+            "1TB SSD",
+            "4K OLED Display",
+            "Ultra Thin & Light"
+        ],
+        price: "₹1,49,999"
+    },
+
+    Wise: {
+        img: "assets/Wise.png",
+        specs: [
+            "Intel i5 13th Gen",
+            "Integrated Graphics",
+            "16GB RAM",
+            "512GB SSD",
+            "Full HD Display",
+            "Lightweight Productivity"
+        ],
+        price: "₹99,999"
+    }
+};
+
+    const container = document.getElementById('cardContainer');
+    Object.keys(data).forEach(name => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${data[name].img}" alt="${name}">
+            <h2>${name}</h2>
+        `;
+        card.onclick = () => openPopup(name);
+        container.appendChild(card);
+    });
+
+    gsap.from(".card", {
+        y: 100,
+        opacity: 0,
+        duration: 1.2,
+        stagger: 0.2,
+        ease: "power4.out"
+    });
+
+    const cursor = document.getElementById('cursor');
+    const glow = document.getElementById('glow');
+    
+    window.onmousemove = (e) => {
+    // Use gsap.set for the cursor to avoid the "lagging" feel
+    gsap.set(cursor, { 
+        x: e.clientX, 
+        y: e.clientY,
+        xPercent: -50, // Centers the cursor on the mouse
+        yPercent: -50 
+    });
+    
+    // Keep the glow trailing behind slightly for that liquid effect
+    gsap.to(glow, { x: e.clientX - 300, y: e.clientY - 300, duration: 1 });
+};
+
+document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+        gsap.to(cursor, { scale: 3, background: 'white', duration: 0.3 });
+    });
+
+    card.addEventListener('mouseleave', () => {
+        gsap.to(card, { rotationX: 0, rotationY: 0, duration: 0.5 });
+        gsap.to(cursor, { scale: 1, background: 'var(--primary)', duration: 0.3 });
+    });
+
+    card.onmousemove = (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const dx = x - rect.width / 2;
+        const dy = y - rect.height / 2;
+        
+        gsap.to(card, {
+            rotationY: dx / 15,
+            rotationX: -dy / 15,
+            duration: 0.5
+        });
+    };
+});
+    function openPopup(name) {
+    const item = data[name];
+    const popup = document.getElementById("popup");
+    const specsCont = document.getElementById("specs-container");
+    
+    document.getElementById("popup-img").src = item.img;
+    document.getElementById("title").innerText = name;
+    document.getElementById("price").innerText = item.price;
+    
+    specsCont.innerHTML = item.specs.map(s => `<div class="spec-item">${s}</div>`).join('');
+
+    // 1. Show the popup container immediately (background appears instantly)
+    popup.style.display = 'grid';
+    popup.style.opacity = '1'; 
+    document.body.classList.add('body-shrunk');
+
+    // 2. Animate ONLY the content
+    const tl = gsap.timeline();
+    tl.to(".popup-content", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" })
+      .to(".spec-item", { opacity: 1, x: 0, stagger: 0.05, duration: 0.3 }, "-=0.2")
+      .from("#popup-img", { x: -100, opacity: 0, duration: 0.8, ease: "power3.out" }, 0);
+}
+    function closePopup() {
+        gsap.to(".popup-content", { 
+            opacity: 0, 
+            duration: 0.3, 
+            onComplete: () => {
+                document.getElementById("popup").style.display = 'none';
+                document.body.classList.remove('body-shrunk');
+            } 
+        });
+    }
+</script>
+
+</body>
+</html>
